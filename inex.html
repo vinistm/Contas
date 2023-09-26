@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle Financeiro</title>
+</head>
+<body>
+    <h1>Controle Financeiro</h1>
+
+    <!-- Seção de Dívidas -->
+    <div id="dividas">
+        <h2>Dívidas</h2>
+        <input type="text" id="dividaNome" placeholder="Nome da Dívida">
+        <input type="number" id="dividaValor" placeholder="Valor">
+        <select id="dividaStatus">
+            <option value="a_pagar">A Pagar</option>
+            <option value="paga">Paga</option>
+        </select>
+        <button onclick="adicionarDivida()">Adicionar Dívida</button>
+        <ul id="listaDividas"></ul>
+    </div>
+
+    <!-- Seção de Dinheiro Disponível -->
+    <div id="dinheiroDisponivel">
+        <h2>Dinheiro Disponível</h2>
+        <input type="text" id="dinheiroNome" placeholder="Nome da Fonte de Dinheiro">
+        <input type="number" id="dinheiroValor" placeholder="Valor">
+        <button onclick="adicionarDinheiro()">Adicionar Dinheiro</button>
+        <ul id="listaDinheiro"></ul>
+    </div>
+
+    <!-- Seção de Falta Receber -->
+    <div id="faltaReceber">
+        <h2>Falta Receber</h2>
+        <input type="text" id="receberNome" placeholder="Nome da Pessoa">
+        <input type="number" id="receberValor" placeholder="Valor">
+        <button onclick="adicionarReceber()">Adicionar Falta Receber</button>
+        <ul id="listaReceber"></ul>
+    </div>
+
+    <!-- Balanço -->
+    <div id="balanco">
+        <h2>Balanço</h2>
+        <p>Total de Dívidas: <span id="totalDividas">0</span></p>
+        <p>Total de Dinheiro Disponível: <span id="totalDinheiro">0</span></p>
+        <p>Falta Receber: <span id="faltaReceberTotal">0</span></p>
+        <p>Situação Financeira: <span id="situacaoFinanceira">Equilibrado</span></p>
+    </div>
+
+    <script>
+        // Arrays para armazenar informações
+        let dividas = [];
+        let dinheiroDisponivel = [];
+        let faltaReceber = [];
+
+        // Função para adicionar dívida
+        function adicionarDivida() {
+            const nome = document.getElementById("dividaNome").value;
+            const valor = parseFloat(document.getElementById("dividaValor").value);
+            const status = document.getElementById("dividaStatus").value;
+
+            if (nome && !isNaN(valor)) {
+                dividas.push({ nome, valor, status });
+                atualizarListaDividas();
+                calcularBalanco();
+                document.getElementById("dividaNome").value = "";
+                document.getElementById("dividaValor").value = "";
+            }
+        }
+
+        // Função para adicionar dinheiro disponível
+        function adicionarDinheiro() {
+            const nome = document.getElementById("dinheiroNome").value;
+            const valor = parseFloat(document.getElementById("dinheiroValor").value);
+
+            if (nome && !isNaN(valor)) {
+                dinheiroDisponivel.push({ nome, valor });
+                atualizarListaDinheiro();
+                calcularBalanco();
+                document.getElementById("dinheiroNome").value = "";
+                document.getElementById("dinheiroValor").value = "";
+            }
+        }
+
+        // Função para adicionar falta receber
+        function adicionarReceber() {
+            const nome = document.getElementById("receberNome").value;
+            const valor = parseFloat(document.getElementById("receberValor").value);
+
+            if (nome && !isNaN(valor)) {
+                faltaReceber.push({ nome, valor });
+                atualizarListaReceber();
+                calcularBalanco();
+                document.getElementById("receberNome").value = "";
+                document.getElementById("receberValor").value = "";
+            }
+        }
+
+        // Função para atualizar lista de dívidas
+        function atualizarListaDividas() {
+            const listaDividas = document.getElementById("listaDividas");
+            listaDividas.innerHTML = "";
+            dividas.forEach((divida, index) => {
+                const li = document.createElement("li");
+                li.innerHTML = `${divida.nome} - Valor: ${divida.valor} - Status: ${divida.status} <button onclick="removerDivida(${index})">Remover</button> <button onclick="editarDivida(${index})">Editar</button>`;
+                listaDividas.appendChild(li);
+            });
+        }
+
+        // Função para atualizar lista de dinheiro disponível
+        function atualizarListaDinheiro() {
+            const listaDinheiro = document.getElementById("listaDinheiro");
+            listaDinheiro.innerHTML = "";
+            dinheiroDisponivel.forEach((fonte, index) => {
+                const li = document.createElement("li");
+                li.innerHTML = `${fonte.nome} - Valor: ${fonte.valor} <button onclick="removerDinheiro(${index})">Remover</button>`;
+                listaDinheiro.appendChild(li);
+            });
+        }
+
+        // Função para atualizar lista de falta receber
+        function atualizarListaReceber() {
+            const listaReceber = document.getElementById("listaReceber");
+            listaReceber.innerHTML = "";
+            faltaReceber.forEach((pessoa, index) => {
+                const li = document.createElement("li");
+                li.innerHTML = `${pessoa.nome} - Valor: ${pessoa.valor} <button onclick="removerReceber(${index})">Remover</button>`;
+                listaReceber.appendChild(li);
+            });
+        }
+
+        // Função para remover dívida
+        function removerDivida(index) {
+            dividas.splice(index, 1);
+            atualizarListaDividas();
+            calcularBalanco();
+        }
+
+        // Função para remover dinheiro disponível
+        function removerDinheiro(index) {
+            dinheiroDisponivel.splice(index, 1);
+            atualizarListaDinheiro();
+            calcularBalanco();
+        }
+
+        // Função para remover falta receber
+        function removerReceber(index) {
+            faltaReceber.splice(index, 1);
+            atualizarListaReceber();
+            calcularBalanco();
+        }
+
+        // Função para editar dívida
+        function editarDivida(index) {
+            const novaNome = prompt("Novo nome da dívida:");
+            const novoValor = parseFloat(prompt("Novo valor da dívida:"));
+            const novoStatus = prompt("Novo status da dívida (a_pagar ou paga):");
+
+            if (novaNome && !isNaN(novoValor) && (novoStatus === "a_pagar" || novoStatus === "paga")) {
+                dividas[index] = { nome: novaNome, valor: novoValor, status: novoStatus };
+                atualizarListaDividas();
+                calcularBalanco();
+            }
+        }
+
+        // Função para calcular o balanço financeiro
+        function calcularBalanco() {
+            const totalDividas = dividas.reduce((total, divida) => total + divida.valor, 0);
+            const totalDinheiro = dinheiroDisponivel.reduce((total, fonte) => total + fonte.valor, 0);
+            const faltaReceberTotal = faltaReceber.reduce((total, pessoa) => total + pessoa.valor, 0);
+            const saldo = totalDinheiro - totalDividas - faltaReceberTotal;
+
+            document.getElementById("totalDividas").textContent = totalDividas.toFixed(2);
+            document.getElementById("totalDinheiro").textContent = totalDinheiro.toFixed(2);
+            document.getElementById("faltaReceberTotal").textContent = faltaReceberTotal.toFixed(2);
+
+            const situacaoFinanceira = saldo >= 0 ? "Sobrando dinheiro" : "Faltando dinheiro";
+            document.getElementById("situacaoFinanceira").textContent = situacaoFinanceira;
+        }
+
+        // Inicializa a lista e o balanço
+        atualizarListaDividas();
+        atualizarListaDinheiro();
+        atualizarListaReceber();
+        calcularBalanco();
+    </script>
+</body>
+</html>
